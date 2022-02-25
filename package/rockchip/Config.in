@@ -161,6 +161,7 @@ source "package/rockchip/camera_engine_rkaiq/Config.in"
 source "package/rockchip/rv1108_package/Config.in"
 
 # Shared packages with all chips
+source "package/rockchip/tee-user-app/Config.in"
 source "package/rockchip/ros/Config.in"
 source "package/rockchip/LocalPlayer/Config.in"
 source "package/rockchip/apl-core-library/Config.in"
