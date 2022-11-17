@@ -57,7 +57,8 @@ static int check_ramdisk_env(const char *file)
 
 	while (!feof(fp)) {
 		fgets(buf, 1000, fp);
-		if (!grep_string(buf, "none / rootfs")) {
+		if ((!grep_string(buf, "none / rootfs")) ||
+		    (!grep_string(buf, "rootfs / rootfs"))) {
 			fclose(fp);
 			return 0;
 		}
@@ -334,7 +335,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* check proc has mounted */
-	if (run_system("/bin/mount -t proc proc /proc")) {
+	if (run_system("/bin/mount -t proc proc /proc || true")) {
 		printf("ERROR: failed to run system command\n");
 		return -1;
 	}
