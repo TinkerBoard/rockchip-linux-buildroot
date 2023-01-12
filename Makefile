@@ -194,15 +194,17 @@ $(if $(BASE_DIR),, $(error output directory "$(O)" does not exist))
 # still be overridden on the command line, therefore the file is re-created
 # every time make is run.
 
-BR2_EXTERNAL_FILE = $(BASE_DIR)/.br-external.mk
+BR2_EXTERNAL_FILE = $(BASE_DIR)/.br2-external.mk
 -include $(BR2_EXTERNAL_FILE)
-$(shell support/scripts/br2-external \
-	-m -o '$(BR2_EXTERNAL_FILE)' $(BR2_EXTERNAL))
+$(shell support/scripts/br2-external -d '$(BASE_DIR)' $(BR2_EXTERNAL))
 BR2_EXTERNAL_ERROR =
 include $(BR2_EXTERNAL_FILE)
 ifneq ($(BR2_EXTERNAL_ERROR),)
 $(error $(BR2_EXTERNAL_ERROR))
 endif
+
+# Workaround bug in make-4.3: https://savannah.gnu.org/bugs/?57676
+$(BASE_DIR)/.br2-external.mk:;
 
 # To make sure that the environment variable overrides the .config option,
 # set this before including .config.
@@ -878,7 +880,7 @@ HOSTCFLAGS = $(CFLAGS_FOR_BUILD)
 export HOSTCFLAGS
 
 .PHONY: prepare-kconfig
-prepare-kconfig: outputmakefile $(BUILD_DIR)/.br2-external.in
+prepare-kconfig: outputmakefile
 
 $(BUILD_DIR)/buildroot-config/%onf:
 	mkdir -p $(@D)/lxdialog
@@ -896,7 +898,7 @@ COMMON_CONFIG_ENV = \
 	KCONFIG_TRISTATE=$(BUILD_DIR)/buildroot-config/tristate.config \
 	BR2_CONFIG=$(BR2_CONFIG) \
 	HOST_GCC_VERSION="$(HOSTCC_VERSION)" \
-	BUILD_DIR=$(BUILD_DIR) \
+	BASE_DIR=$(BASE_DIR) \
 	SKIP_LEGACY=
 
 xconfig: $(BUILD_DIR)/buildroot-config/qconf prepare-kconfig
@@ -974,13 +976,6 @@ ifeq ($(NEED_WRAPPER),y)
 	$(Q)$(TOPDIR)/support/scripts/mkmakefile $(TOPDIR) $(O)
 endif
 
-# Even though the target is a real file, we mark it as PHONY as we
-# want it to be re-generated each time make is invoked, in case the
-# value of BR2_EXTERNAL is changed.
-.PHONY: $(BUILD_DIR)/.br2-external.in
-$(BUILD_DIR)/.br2-external.in: $(BUILD_DIR)
-	$(Q)support/scripts/br2-external -k -o "$(@)" $(BR2_EXTERNAL)
-
 # printvars prints all the variables currently defined in our
 # Makefiles. Alternatively, if a non-empty VARS variable is passed,
 # only the variables matching the make pattern passed in VARS are
@@ -1008,7 +1003,7 @@ ifeq ($(O),$(CURDIR)/output)
 	rm -rf $(O)
 endif
 	rm -rf $(TOPDIR)/dl $(BR2_CONFIG) $(CONFIG_DIR)/.config.old $(CONFIG_DIR)/..config.tmp \
-		$(CONFIG_DIR)/.auto.deps $(BR2_EXTERNAL_FILE)
+		$(CONFIG_DIR)/.auto.deps $(BASE_DIR)/.br2-external.*
 
 .PHONY: help
 help:
