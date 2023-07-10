@@ -62,12 +62,12 @@ main() {
     # Forget our options, and keep only those for the backend
     shift $((OPTIND-1))
 
-    if echo "${uris[@]}" | grep -wq github.com; then
-        # Use kgithub instead of github when unable to access google
-        if ! ping google.com -c 1 -W 1 &>/dev/null; then
-            use_kgithub=1
-        fi
-    fi
+    #if echo "${uris[@]}" | grep -wq github.com; then
+    #    # Use kgithub instead of github when unable to access google
+    #    if ! ping google.com -c 1 -W 1 &>/dev/null; then
+    #        use_kgithub=1
+    #    fi
+    #fi
 
     if [ -z "${output}" ]; then
         error "no output specified, use -o\n"
